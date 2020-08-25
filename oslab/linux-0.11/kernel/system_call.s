@@ -58,7 +58,7 @@ sa_mask = 4
 sa_flags = 8
 sa_restorer = 12
 
-nr_system_calls = 72
+nr_system_calls = 74
 
 /*
  * Ok, I get parallel printer interrupts while using the floppy for some
@@ -78,7 +78,7 @@ reschedule:
 	jmp schedule
 .align 2
 system_call:
-	cmpl $nr_system_calls-1,%eax
+	cmpl $nr_system_calls-1,%eax # 比较中断号是否大于73
 	ja bad_sys_call
 	push %ds
 	push %es
