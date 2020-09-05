@@ -2,6 +2,7 @@ romimage: file=$OSLAB_PATH/bochs/BIOS-bochs-latest
 megs: 16
 vgaromimage: file=$OSLAB_PATH/bochs/vgabios.bin
 floppya: 1_44="$OSLAB_PATH/linux-0.11/Image", status=inserted
+# 启动盘信息
 ata0-master: type=disk, path="$OSLAB_PATH/hdc-0.11.img", mode=flat, cylinders=204, heads=16, spt=38
 boot: a
 log: $OSLAB_PATH/bochsout.txt

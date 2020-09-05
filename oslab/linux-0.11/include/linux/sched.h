@@ -79,33 +79,33 @@ struct tss_struct {
 
 struct task_struct {
 /* these are hardcoded - don't touch */
-	long state;	/* -1 unrunnable, 0 runnable, >0 stopped */
-	long counter;
-	long priority;
-	long signal;
+	long state;	// 任务的运行状态(-1 不可运行, 0 可运行就绪 >0 已停止)
+	long counter;  //任务运行时间计数(滴答数).运行时间片
+	long priority; // 运行优先数, 任务开始运行时 counter = priority, 越大运行越长
+	long signal;  // 信号 是位图 每个bite位表示一种型号
 	struct sigaction sigaction[32];
 	long blocked;	/* bitmap of masked signals */
 /* various fields */
-	int exit_code;
-	unsigned long start_code,end_code,end_data,brk,start_stack;
-	long pid,father,pgrp,session,leader;
-	unsigned short uid,euid,suid;
-	unsigned short gid,egid,sgid;
+	int exit_code; // 任务退出停止的退出码
+	unsigned long start_code,end_code,end_data,brk,start_stack; // 代码段地址,代码段长度(字节数),代码段地址+代码段长度(字节数),总长度,堆栈地址
+	long pid,father,pgrp,session,leader;  // 进程号,父进程号,进程组号,会话号,会话首领
+	unsigned short uid,euid,suid; // 用户id,有效用户id,保存用户id(和用户的权限有关)
+	unsigned short gid,egid,sgid; // 组id,有效组id,保存组id
 	long alarm;
-	long utime,stime,cutime,cstime,start_time;
+	long utime,stime,cutime,cstime,start_time; // 用户态运行时间,内核态运行时间,子进程用户态运行时间,子进程内核态运行时间
 	unsigned short used_math;
 /* file system info */
 	int tty;		/* -1 if no tty, so it must be signed */
 	unsigned short umask;
-	struct m_inode * pwd;
-	struct m_inode * root;
+	struct m_inode * pwd; // 工作目录
+	struct m_inode * root; //
 	struct m_inode * executable;
 	unsigned long close_on_exec;
-	struct file * filp[NR_OPEN];
+	struct file * filp[NR_OPEN]; // 进程使用的文件表结构
 /* ldt for this task 0 - zero 1 - cs 2 - ds&ss */
-	struct desc_struct ldt[3];
+	struct desc_struct ldt[3]; // 任务的局部描述符表, 0空,1代码端cs,2 数据和堆栈 ds ss  //  unsigned long a,b; 64位
 /* tss for this task */
-	struct tss_struct tss;
+	struct tss_struct tss; // 寄存器信息
 };
 
 /*
@@ -135,7 +135,7 @@ struct task_struct {
 	}, \
 }
 
-extern struct task_struct *task[NR_TASKS];
+extern struct task_struct *task[NR_TASKS]; // 结构体指针 数组 []>*
 extern struct task_struct *last_task_used_math;
 extern struct task_struct *current;
 extern long volatile jiffies;

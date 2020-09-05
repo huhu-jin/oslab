@@ -204,17 +204,21 @@ sys_execve:
 	addl $4,%esp
 	ret
 
+### sys_fork()调用，用于创建子进程，是system_call功能号2.
+# 首先调用C函数find_empty_process()，取得一个进程号PID。若返回负数则说明目前任务数组
+# 已满。然后调用copy_process()复制进程。
 .align 2
 sys_fork:
 	call find_empty_process
-	testl %eax,%eax
-	js 1f
+	 # Test对两个参数(目标，源)执行AND逻辑操作，并根据结果设置标志寄存器，结果本身不会保存。
+	testl %eax,%eax # 在eax中返回进程号pid。若返回负数则退出
+	js 1f # js 负数跳转
 	push %gs
 	pushl %esi
 	pushl %edi
 	pushl %ebp
 	pushl %eax
-	call copy_process
+	call copy_process  # 调用了c函数的copy_process, 越后面入栈的参数,是越靠近c函数左侧
 	addl $20,%esp
 1:	ret
 

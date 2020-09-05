@@ -20,7 +20,10 @@
 
 #include <signal.h>
 
+// 该宏取信号nr在信号位图中对应位的二进制数值。信号编号1-32.比如信号5的位图
+// 数值等于 1 <<(5-1) = 16 = 00010000b
 #define _S(nr) (1<<((nr)-1))
+// 除了SIGKILL 和SIGSTOP信号以外其他信号都是可阻塞的~( 1<8 | 1<18 )
 #define _BLOCKABLE (~(_S(SIGKILL) | _S(SIGSTOP)))
 
 void show_task(int nr,struct task_struct * p)
@@ -59,7 +62,7 @@ static union task_union init_task = {INIT_TASK,};
 
 long volatile jiffies=0;
 long startup_time=0;
-struct task_struct *current = &(init_task.task);
+struct task_struct *current = &(init_task.task); // 第一次定义了current
 struct task_struct *last_task_used_math = NULL;
 
 struct task_struct * task[NR_TASKS] = {&(init_task.task), };
@@ -138,6 +141,8 @@ void schedule(void)
 				(*p)->counter = ((*p)->counter >> 1) +
 						(*p)->priority;
 	}
+	// 用下面的宏把当前任务指针current指向任务号Next的任务，并切换到该任务中运行。上面Next
+    // 被初始化为0
 	switch_to(next);
 }
 
@@ -382,7 +387,7 @@ int sys_nice(long increment)
 	return 0;
 }
 
-// 调度初始化
+// 调度程序 初始化
 void sched_init(void)
 {
 	int i;
@@ -401,12 +406,16 @@ void sched_init(void)
 		p++;
 	}
 /* Clear NT, so that we won't have troubles with that later on */
-	__asm__("pushfl ; andl $0xffffbfff,(%esp) ; popfl");
+	__asm__("pushfl ; andl $0xffffbfff,(%esp) ; popfl"); // 复位NT标志
 	ltr(0);
 	lldt(0);
+	// 下面代码用于初始化8253定时器。
 	outb_p(0x36,0x43);		/* binary, mode 3, LSB/MSB, ch 0 */
 	outb_p(LATCH & 0xff , 0x40);	/* LSB */
 	outb(LATCH >> 8 , 0x40);	/* MSB */
+	// 设置时钟中断处理程序句柄(设置时钟中断门)。修改中断控制器屏蔽码，允许时钟中断。
+    // 然后设置系统调用中断门。这两个设置中断描述符表IDT中描述符在宏定义在文件
+    // include/asm/system.h中。
 	set_intr_gate(0x20,&timer_interrupt);
 	outb(inb_p(0x21)&~0x01,0x21);
 	set_system_gate(0x80,&system_call); // 设置0x80 系统中断 描述符
